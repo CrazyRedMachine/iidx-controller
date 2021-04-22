@@ -156,7 +156,16 @@ bool IIDXHID_::setup(USBSetup& setup) {
                     if (hid_reactive_autoswitch)
                       hid_lights = true;
                     if (hid_lights) {
-                        for (int i = 0; i < NUMBER_OF_LEDS; i++) {
+                        for (int i = 0; i < NUMBER_OF_BUTTONS; i++) {
+                            if (usb_data[1] >> i & 1) {
+                                digitalWrite(led_pins[i], LOW);
+                            } else if (i >= 8 && usb_data[2] >> (i - 8) & 1) {
+                                digitalWrite(led_pins[i], LOW);
+                            } else {
+                                digitalWrite(led_pins[i], HIGH);
+                            }
+                        }
+                        for (int i = NUMBER_OF_BUTTONS; i < NUMBER_OF_LEDS; i++) {
                             if (usb_data[1] >> i & 1) {
                                 digitalWrite(led_pins[i], HIGH);
                             } else if (i >= 8 && usb_data[2] >> (i - 8) & 1) {

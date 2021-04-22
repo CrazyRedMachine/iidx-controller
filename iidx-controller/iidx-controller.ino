@@ -10,32 +10,32 @@ IIDXHID_ IIDXHID;
 
 // Pins where the LEDs are connected to
 uint8_t led_pins[NUMBER_OF_LEDS] = {
-    2,    // button 1 led
-    4,    // button 2 led
-    6,    // button 3 led
-    8,    // button 4 led
-    10,   // button 5 led
-    12,   // button 6 led
-    18,   // button 7 led
-    20,   // misc button 1 led
-    22,   // misc button 2 led
-    14,   // misc button 3 led
-    16    // misc button 4 led
+    12,    // button 1 led
+    A4,    // button 2 led
+    MOSI,    // button 3 led
+    A2,    // button 4 led
+    A5,   // button 5 led
+    A3,   // button 6 led
+    11,   // button 7 led
+    A1,   // misc button 1 led
+    A0,   // misc button 2 led
+    3,   // TT led
+   // 16    // misc button 4 led
 };
 
 // Pins where the buttons are connected to
 uint8_t button_pins[NUMBER_OF_BUTTONS] = {
-    3,    // button 1
-    5,    // button 2
-    7,    // button 3
-    9,    // button 4
-    11,   // button 5
-    13,   // button 6
-    19,   // button 7
-    21,   // misc button 1
-    23,   // misc button 2
-    15,   // misc button 3
-    17    // misc button 4
+    13,    // button 1
+    6,    // button 2
+    4,    // button 3
+    8,    // button 4
+    5,   // button 5
+    7,   // button 6
+    2,   // button 7
+    9,   // misc button 1
+    10,   // misc button 2
+  //  15,   // misc button 3
+  //  17    // misc button 4
 };
 
 // Pins encoder is connected to
@@ -122,17 +122,46 @@ void loop() {
         }
 
         if (reactive) {
-            digitalWrite(led_pins[i], !(button_value));
+            digitalWrite(led_pins[i], (button_value));
         }
     }
-
     // Limit the encoder from 0 to ENCODER_PPR
     if (tt_pos >= ENCODER_PPR) {
         tt_pos = 1;
     } else if (tt_pos <= 0) {
         tt_pos = ENCODER_PPR - 1;
     }
+    if (reactive)
+    {
+     static int32_t last_ttpos = 0;
+     static uint8_t ttpos_cooldown = 0;
+     static uint16_t off_cooldown = 0;
+     static uint16_t pwmval = 0;
 
+     if (tt_pos != last_ttpos) //if ((buttons_state) || (tt_pos != last_ttpos))
+     {
+      if (pwmval < 255*16-1) pwmval+=2;
+      else pwmval = 255*16;
+      off_cooldown = 1024;
+     }
+     else {
+      if (off_cooldown == 0)
+      {
+        if (pwmval>0) pwmval--;        
+      }
+      else off_cooldown--;
+     }
+     
+     analogWrite(3, pwmval/16);
+
+      if (ttpos_cooldown == 0){
+        last_ttpos = tt_pos;
+        ttpos_cooldown = 128;
+      }
+     else ttpos_cooldown--;
+
+    }
+    
     // Send turntable and button state every 1000 microseconds
     if (((micros() - last_report) >= REPORT_DELAY)) {
         IIDXHID.send_state(buttons_state, tt_pos);
