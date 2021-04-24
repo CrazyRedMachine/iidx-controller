@@ -174,21 +174,12 @@ void loop() {
       if (hid_reactive_autoswitch)
       {
         hid_reactive_autoswitch = false;
-        hid_lights = false;
-        reactive = true;  // 1 x x -> 0 0 1
-      }
-      else if (reactive && hid_lights)
-      {
-        hid_reactive_autoswitch = true;  // 0 1 1 - > 1 x x
-      }
-      else if (reactive)
-      {
-        reactive = false; 
-        hid_lights = true; // 0 0 1 -> 0 1 0
+        hid_lights = true;
+        reactive = true;  // 1 x x -> 0 1 1
       }
       else
       {
-        reactive = true; // 0 1 0 -> 0 1 1
+        hid_reactive_autoswitch = true;  // 0 1 1 - > 1 x x
       }
     }
     else if (!(buttons_state&((uint32_t)1 << (NUMBER_OF_BUTTONS-3)))) {
