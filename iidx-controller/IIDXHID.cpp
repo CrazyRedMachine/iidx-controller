@@ -190,22 +190,20 @@ unsigned long IIDXHID_::getLastHidUpdate(){
 
 void IIDXHID_::write_lights(uint32_t button_state, bool hid, bool reactive) {
   if (!reactive) button_state = 0;
-                    if (hid) {
-                        for (int i = 0; i < NUMBER_OF_LEDS-1; i++) {
-                            if (lamp_hid_state >> i & 1) {
-                                button_state |= (uint32_t)1<<i;
-                        }
-                        }
-                        if (!reactive) //hid tt only in pure hid mode
-                        {
-                          // my TT led has reversed logic for some reason..
-                            if ((lamp_hid_state >>(NUMBER_OF_LEDS-1))& 1) {
-                                digitalWrite(led_pins[NUMBER_OF_LEDS-1], HIGH);
-                            } else {
-                                digitalWrite(led_pins[NUMBER_OF_LEDS-1], LOW);
-                            }
-                        }
-                    }           
+  if (hid) 
+  {
+    button_state |= lamp_hid_state;
+  
+    if (!reactive) //hid tt only in pure hid mode
+    {
+      // my TT led has reversed logic for some reason..
+      if ((lamp_hid_state >>(NUMBER_OF_LEDS-1))& 1) {
+        digitalWrite(led_pins[NUMBER_OF_LEDS-1], HIGH);
+      } else {
+        digitalWrite(led_pins[NUMBER_OF_LEDS-1], LOW);
+      }
+    }
+  }           
   for (int i=0; i<NUMBER_OF_LEDS-1; i++)
   {
             digitalWrite(led_pins[i], !((button_state>>i)&1));
