@@ -32,7 +32,7 @@ uint8_t button_pins[NUMBER_OF_BUTTONS] = {
     5,   // button 5
     7,   // button 6
     2,   // button 7
-    9,   // effect
+    9,   // vefx
     10,   // start
     SCK,   // test
     MISO    // service
@@ -94,7 +94,6 @@ void setup() {
 }
 
 void loop() {
-
     uint32_t buttons_state = 0;
 
     /* mixed mode will behave sometimes like HID, sometimes like reactive */
@@ -122,6 +121,59 @@ void loop() {
             buttons_state &= ~((uint32_t)1 << i);
         }
     }
+
+    /* take care of double/triple click for select (single = vefx, double = effect, triple = vefx+effect) */
+    // on apuie sur select, previous_select se met à 255
+    // des qu'on lache il decroit progressivement
+    // si on appuie et que previous alors on passe en double, et previous select se met à 255
+    // des qu'on lache il decroit
+    // si on appuie et que previous alors on passe en triple, previous select se met à 255
+    // des qu'on lache il zero
+
+    //si previous atteint 0 alors double et triple se remettent à false
+    
+    static uint16_t previous_select = 0;
+    static bool select_double = false;
+    static bool select_triple = false;
+    if (buttons_state>>7&1)
+    {
+      if (previous_select)
+      {
+        if (previous_select<512)
+        {
+          if (select_double) select_triple = true;
+          else select_double = true;          
+        }
+      }
+      previous_select = 512;
+    }
+    else
+    {
+      if (previous_select)
+      {
+        previous_select--;
+        if (previous_select == 0)
+        {
+          select_double = false;
+        }
+      }
+      if (select_triple)
+      {
+        select_double = false;
+        select_triple = false;
+      }
+    }
+    //change output based on double/triple click
+    if (select_triple)
+    {
+      buttons_state |= (uint32_t)1 << 11;
+    }
+    else if (select_double)
+    {
+      buttons_state |= (uint32_t)1 << 11;      
+      buttons_state &= ~((uint32_t)1 << 7);
+    }
+    
         IIDXHID.write_lights(buttons_state, hid_lights, reactive);
     // Limit the encoder from 0 to ENCODER_PPR
     if (tt_pos >= ENCODER_PPR) {

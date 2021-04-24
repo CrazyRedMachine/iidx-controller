@@ -10,9 +10,6 @@ uint8_t usb_data[128];
 uint16_t lamp_hid_state = 0;
 uint8_t extern tt_sensitivity;
 uint8_t extern led_pins[];
-bool extern hid_reactive_autoswitch;
-bool extern hid_lights;
-bool extern reactive;
 
 static const uint8_t PROGMEM hid_report[] = {
     0x05, 0x01,                      // USAGE_PAGE (Generic Desktop)
@@ -24,11 +21,11 @@ static const uint8_t PROGMEM hid_report[] = {
     /* Buttons */
     0x05, 0x09,                      //   USAGE_PAGE (Button)
     0x19, 0x01,                      //   USAGE_MINIMUM (Button 1)
-    0x29, NUMBER_OF_BUTTONS,         //   USAGE_MAXIMUM (Button NUMBER_OF_BUTTONS)
+    0x29, NUMBER_OF_BUTTONS+1,         //   USAGE_MAXIMUM (Button NUMBER_OF_BUTTONS)
     0x15, 0x00,                      //   LOGICAL_MINIMUM (0)
     0x25, 0x01,                      //   LOGICAL_MAXIMUM (1)
     0x75, 0x01,                      //   REPORT_SIZE (1)
-    0x95, NUMBER_OF_BUTTONS,         //   REPORT_COUNT (NUMBER_OF_BUTTONS)
+    0x95, NUMBER_OF_BUTTONS+1,         //   REPORT_COUNT (NUMBER_OF_BUTTONS)
     0x55, 0x00,                      //   UNIT_EXPONENT (0)
     0x65, 0x00,                      //   UNIT (None)
     0x81, 0x02,                      //   INPUT (Data,Var,Abs)
@@ -36,7 +33,7 @@ static const uint8_t PROGMEM hid_report[] = {
 
     /* Buttons padding */
     0x75, 0x01,                      //   REPORT_SIZE (1)
-    0x95, BUTTON_PADDING,            //   REPORT_COUNT (BUTTON_PADDING)
+    0x95, BUTTON_PADDING-1,            //   REPORT_COUNT (BUTTON_PADDING)
     0x81, 0x03,                      //   INPUT (Cnst,Var,Abs)
     /* Buttons padding END */
 
