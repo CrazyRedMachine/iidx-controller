@@ -3,7 +3,7 @@
 
 #include "IIDXHID.h"
 
-#define REPORT_DELAY 1000
+#define REPORT_DELAY 990
 #define MS_DEBOUNCE 5
 
 IIDXHID_ IIDXHID;
@@ -17,8 +17,8 @@ uint8_t led_pins[NUMBER_OF_LEDS] = {
     A5,   // button 5 led
     A3,   // button 6 led
     11,   // button 7 led
-    A1,   // misc button 1 led
-    A0,   // misc button 2 led
+    A1,   // effect led
+    A0,   // start led
     3,   // TT led
    // 16    // misc button 4 led
 };
@@ -32,10 +32,10 @@ uint8_t button_pins[NUMBER_OF_BUTTONS] = {
     5,   // button 5
     7,   // button 6
     2,   // button 7
-    9,   // misc button 1
-    10,   // misc button 2
-  //  15,   // misc button 3
-  //  17    // misc button 4
+    9,   // effect
+    10,   // start
+    SCK,   // test
+    MISO    // service
 };
 
 // Pins encoder is connected to
@@ -121,7 +121,7 @@ void loop() {
             buttons_state &= ~((uint32_t)1 << i);
         }
 
-        if (reactive) {
+        if (reactive && i<NUMBER_OF_LEDS-1) {
             digitalWrite(led_pins[i], (button_value));
         }
     }
@@ -152,7 +152,7 @@ void loop() {
       else off_cooldown--;
      }
      
-     analogWrite(3, pwmval/16);
+     analogWrite(led_pins[NUMBER_OF_LEDS-1], pwmval/16);
 
       if (ttpos_cooldown == 0){
         last_ttpos = tt_pos;

@@ -156,7 +156,7 @@ bool IIDXHID_::setup(USBSetup& setup) {
                     if (hid_reactive_autoswitch)
                       hid_lights = true;
                     if (hid_lights) {
-                        for (int i = 0; i < NUMBER_OF_BUTTONS; i++) {
+                        for (int i = 0; i < NUMBER_OF_LEDS-1; i++) {
                             if (usb_data[1] >> i & 1) {
                                 digitalWrite(led_pins[i], LOW);
                             } else if (i >= 8 && usb_data[2] >> (i - 8) & 1) {
@@ -165,15 +165,14 @@ bool IIDXHID_::setup(USBSetup& setup) {
                                 digitalWrite(led_pins[i], HIGH);
                             }
                         }
-                        for (int i = NUMBER_OF_BUTTONS; i < NUMBER_OF_LEDS; i++) {
-                            if (usb_data[1] >> i & 1) {
-                                digitalWrite(led_pins[i], HIGH);
-                            } else if (i >= 8 && usb_data[2] >> (i - 8) & 1) {
-                                digitalWrite(led_pins[i], HIGH);
+                          // my TT led has reversed logic for some reason..
+                            if (usb_data[NUMBER_OF_LEDS-1] >> NUMBER_OF_LEDS-1 & 1) {
+                                digitalWrite(led_pins[NUMBER_OF_LEDS-1], HIGH);
+                            } else if (NUMBER_OF_LEDS-1 >= 8 && usb_data[2] >> (NUMBER_OF_LEDS-1 - 8) & 1) {
+                                digitalWrite(led_pins[NUMBER_OF_LEDS-1], HIGH);
                             } else {
-                                digitalWrite(led_pins[i], LOW);
+                                digitalWrite(led_pins[NUMBER_OF_LEDS-1], LOW);
                             }
-                        }
                     }
                 }
                 #if NO_SENSITIVITY == 0
