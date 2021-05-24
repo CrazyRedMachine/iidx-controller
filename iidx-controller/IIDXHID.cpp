@@ -205,12 +205,22 @@ void IIDXHID_::write_lights(uint32_t button_state, bool hid, bool reactive) {
   
 int IIDXHID_::send_state(uint32_t button_state, int32_t turntable_state) {
     uint8_t data[5];
-
+    static int32_t prev_turntable_state = 0;
+    
+    int32_t delta = turntable_state - prev_turntable_state;
+    if (delta > 0 && delta < 800)
+    {
+       button_state |= 1<<(NUMBER_OF_BUTTONS-2);
+    }
+    else if (delta < 0 && delta > -800)
+    {
+       button_state |= 1<<(NUMBER_OF_BUTTONS-1);
+    }
     data[0] = (uint8_t) 5;
     data[1] = (uint8_t) (button_state & 0xFF);
     data[2] = (uint8_t) (button_state >> 8) & 0xFF;
     data[3] = (uint8_t) (turntable_state & 0xFF);
     data[4] = (uint8_t) (turntable_state >> 8) & 0xFF;
-
+    prev_turntable_state = turntable_state;
     return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, data, 5);
 }

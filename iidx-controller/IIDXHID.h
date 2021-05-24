@@ -1,7 +1,7 @@
 #include "HID.h"
 
 #define NUMBER_OF_LEDS 11
-#define NUMBER_OF_BUTTONS 11
+#define NUMBER_OF_BUTTONS 13
 #define ENCODER_PPR 600
 
 #define NO_SENSITIVITY 0
