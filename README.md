@@ -4,11 +4,8 @@ Software that enables you to create your own Arduino based beatmania IIDX contro
 # Features
  - HID lighting support (that works with btools and ttools).
  - Customisable sensitivity over HID for use with lightning mode or your own custom program (more on this further down).
- - Different lighting modes.
-   - Reactive lighting mode when button 1 is pressed (LEDs light up as soon as the corresponding button is pressed).
-   - Disable HID lighting mode when button 2 is pressed.
-   - These modes can be combined by pressing both buttons.
- 
+ - Different lighting modes (more info on this further down in the `Setup` section).
+
 # Requirements
  - An Arduino Leonardo (technically compatible with any ATmega32U4 based board, but only tested with a Leonardo).
  - The [Bounce2](https://www.arduino.cc/reference/en/libraries/bounce2/) library.
@@ -35,11 +32,19 @@ Sensitivity:
  - You can change the 10 sensitivity values by changing the values in the array on line `57` of `iidx-controller/iidx-controller.ino`.
  - Sensitivity can be disabled by setting `NO_SENSITIVITY` to `1` in `iidx-controller/IIDXHID.h` on line `7`.
 
+LED mode switching:
+ - Hold the last button in the button array, and then tap the first button in the button array to switch modes.
+ - The LED mode rotation is as follows:
+   1. HID / reactive auto (default setting, this switches to reactive mode if there are no LED HID messages in 3 seconds)
+   2. Reactive only
+   3. HID only
+   4. HID _and_ reactive
+
 Info:
  - Pinouts are available in `iidx-controller/iidx-controller.ino`, you can edit them there if necessary.
  - If changing the number of buttons / LEDs, change the value in `iidx-controller/IIDXHID.h` (line `3` and `4` respectively) to the new number of buttons / LEDs.
  - Leonardo pinout (what the numbers in the code's pinout arrays mean) at the bottom of this page.
- 
+
 # HID Sensitivity
 In spice, select `Beatmania IIDX` and go to the `Lights` tab. Scroll down until you see `Turntable P1 Resistance` and click the `Bind` button.  
 For `Device` select your Arduino, and for `Light Control` select `Unknown (000a:0000) ...`.
