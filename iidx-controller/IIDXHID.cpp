@@ -23,11 +23,11 @@ static const uint8_t PROGMEM hid_report[] = {
     /* Buttons */
     0x05, 0x09,                      //   USAGE_PAGE (Button)
     0x19, 0x01,                      //   USAGE_MINIMUM (Button 1)
-    0x29, NUMBER_OF_BUTTONS,         //   USAGE_MAXIMUM (Button NUMBER_OF_BUTTONS)
+    0x29, NUMBER_OF_BUTTONS+2,         //   USAGE_MAXIMUM (Button NUMBER_OF_BUTTONS)
     0x15, 0x00,                      //   LOGICAL_MINIMUM (0)
     0x25, 0x01,                      //   LOGICAL_MAXIMUM (1)
     0x75, 0x01,                      //   REPORT_SIZE (1)
-    0x95, NUMBER_OF_BUTTONS,         //   REPORT_COUNT (NUMBER_OF_BUTTONS)
+    0x95, NUMBER_OF_BUTTONS+2,         //   REPORT_COUNT (NUMBER_OF_BUTTONS)
     0x55, 0x00,                      //   UNIT_EXPONENT (0)
     0x65, 0x00,                      //   UNIT (None)
     0x81, 0x02,                      //   INPUT (Data,Var,Abs)
@@ -35,7 +35,7 @@ static const uint8_t PROGMEM hid_report[] = {
 
     /* Buttons padding */
     0x75, 0x01,                      //   REPORT_SIZE (1)
-    0x95, BUTTON_PADDING,            //   REPORT_COUNT (BUTTON_PADDING)
+    0x95, BUTTON_PADDING-2,            //   REPORT_COUNT (BUTTON_PADDING)
     0x81, 0x03,                      //   INPUT (Cnst,Var,Abs)
     /* Buttons padding END */
 
@@ -198,23 +198,49 @@ void IIDXHID_::write_lights(uint32_t button_state, bool hid, bool reactive) {
 }
   
 int IIDXHID_::send_state(uint32_t button_state, int32_t turntable_state) {
-    uint8_t data[5];
+        uint8_t data[5];
     static int32_t prev_turntable_state = 0;
-    
+    static uint16_t cooldown = 0;
+    static int8_t spin = 0;
+    static byte idle;
     int32_t delta = turntable_state - prev_turntable_state;
-    if (delta > 0 && delta < 800)
+
+    if (!cooldown)
     {
-       button_state |= 1<<(NUMBER_OF_BUTTONS-2);
-    }
-    else if (delta < 0 && delta > -800)
+    if (delta > 0 && delta < 5)
     {
-       button_state |= 1<<(NUMBER_OF_BUTTONS-1);
+       cooldown = 30;
+spin = 1;
     }
+    else if (delta < 0 && delta > -5)
+    {
+       cooldown = 30;
+       spin = -1;
+    }
+    else {
+      idle++;
+      if (idle == 20)
+      {
+        spin = 0;
+      }
+    }
+    }
+    else cooldown--;
+
+if (spin > 0)
+{
+         button_state |= 1<<(NUMBER_OF_BUTTONS+1);
+}
+else if (spin < 0)
+{
+         button_state |= 1<<(NUMBER_OF_BUTTONS);
+}
     data[0] = (uint8_t) 5;
     data[1] = (uint8_t) (button_state & 0xFF);
     data[2] = (uint8_t) (button_state >> 8) & 0xFF;
     data[3] = (uint8_t) (turntable_state & 0xFF);
     data[4] = (uint8_t) (turntable_state >> 8) & 0xFF;
-    prev_turntable_state = turntable_state;
+prev_turntable_state = turntable_state;
     return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, data, 5);
+
 }
